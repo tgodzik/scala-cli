@@ -198,14 +198,16 @@ jobs:
         with:
           fetch-depth: 0
           submodules: true
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: VirtusLab/scala-cli-setup@a4c8b538a26205b4f92c3253f4661735b029f6e6
         with:
           apps: ""
       - name: Generate native launcher and generate os packages
         run: .github/scripts/build-linux-aarch64.sh
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       - uses: actions/upload-artifact@v3
         with:
           name: linux-aarch64-launchers
