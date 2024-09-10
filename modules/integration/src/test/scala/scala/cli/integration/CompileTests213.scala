@@ -4,6 +4,59 @@ import scala.util.Properties
 
 class CompileTests213 extends CompileTestDefinitions with Test213 {
 
+  test("recompiling") {
+    val initialInput =
+      s"""|//> using scala ${Constants.scala213}
+          |object Main extends App {
+          |    val msg: String = "1"
+          |    println("Hello!")
+          |}
+          |""".stripMargin
+    TestInputs(
+      os.rel / "Main.scala" -> initialInput
+    ).fromRoot { root =>
+      def compile() = os.proc(TestUtil.cli, "compile", "-v", "-v", "-v", ".").call(
+        cwd = root,
+        check = false,
+        mergeErrIntoOut = true
+      )
+
+      val firstOutput = compile().toString.trim()
+      assert(
+        !firstOutput.contains("[error]"),
+        "File did not compile succesfully:\n" + firstOutput
+      )
+
+      os.write.over(
+        root / "Main.scala",
+        s"""|//> using scala ${Constants.scala213}
+            |object Main extends App {
+            |    val msg: String = 1
+            |    println("Hello!")
+            |}
+            |""".stripMargin
+      )
+
+      val secondOutput = compile().toString.trim()
+      assert(
+        secondOutput.contains("type mismatch"),
+        "File did compiled succesfully, but errors were expected:\n" + secondOutput
+      )
+
+      os.write.over(
+        root / "Main.scala",
+        initialInput
+      )
+
+      val thirdOutput = compile().toString.trim()
+      assert(
+        !thirdOutput.contains("type mismatch"),
+        "File did not compile succesfully:\n" + thirdOutput
+      )
+
+    }
+  }
+
   test("test-macro-output") {
     val triple = "\"\"\""
     TestInputs(
