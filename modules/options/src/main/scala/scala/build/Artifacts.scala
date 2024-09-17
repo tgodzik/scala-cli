@@ -649,7 +649,7 @@ object Artifacts {
       // repository order matters here, since in some cases coursier resolves only the head
       .withRepositories(extraRepositoriesWithFallback ++ defaultFetcher.repositories)
       .addDependencies(dependencies.map(_.value)*)
-      .mapResolutionParams(_.addForceVersion(forceVersion*))
+      .mapResolutionParams(_.addForceVersion(forceVersion*).addProperties("javafx.platform" -> "linux"))
     for (classifiers <- classifiersOpt) {
       if (classifiers("_"))
         fetcher = fetcher.withMainArtifacts()

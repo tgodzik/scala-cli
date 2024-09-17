@@ -4,6 +4,30 @@ import scala.util.Properties
 
 class CompileTests213 extends CompileTestDefinitions with Test213 {
 
+  test("fx") {
+    val initialInput = """|//> using scala 3.5.0
+                          |//> using toolkit 0.5.0
+                          |//> using dep "org.scalafx::scalafx:22.0.0-R33"
+                          |object O
+                          |""".stripMargin
+
+    TestInputs(
+      os.rel / "Main.scala" -> initialInput
+    ).fromRoot { root =>
+      def compile() = os.proc(TestUtil.cli, "compile", "-v", "-v", "-v", ".").call(
+        cwd = root,
+        check = false,
+        mergeErrIntoOut = true
+      )
+
+      val firstOutput = compile().toString.trim()
+      assert(
+        !firstOutput.contains("error"),
+        "File did not compile succesfully:\n" + firstOutput
+      )
+    }
+  }
+  
   test("test-macro-output") {
     val triple = "\"\"\""
     TestInputs(
